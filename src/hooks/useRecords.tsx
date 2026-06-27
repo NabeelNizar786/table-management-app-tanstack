@@ -9,6 +9,8 @@ export const useRecords = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(25);
   const [totalCount, setTotalCount] = useState<number>(0);
+  const [sortBy, setSortBy] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -16,9 +18,13 @@ export const useRecords = () => {
         setLoading(true);
         setError(null);
 
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/records?_page=${currentPage}&_limit=${limit}`,
-        );
+        let url = `${import.meta.env.VITE_API_BASE_URL}/records?_page=${currentPage}&_limit=${limit}`;
+
+        if (sortBy) {
+          url += `&_sort=${sortBy}&_order=${sortOrder}`;
+        }
+
+        const response = await axios.get(url);
 
         setRecords(response?.data);
         setTotalCount(Number(response.headers["x-total-count"]));
@@ -29,7 +35,7 @@ export const useRecords = () => {
       }
     };
     fetchRecords();
-  }, [currentPage, limit]);
+  }, [currentPage, limit, sortBy, sortOrder]);
 
   return {
     records,
@@ -40,5 +46,9 @@ export const useRecords = () => {
     limit,
     setLimit,
     totalCount,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
   };
 };

@@ -12,6 +12,10 @@ function App() {
     limit,
     setLimit,
     totalCount,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
   } = useRecords();
 
   if (loading) return <div>loading...</div>;
@@ -19,7 +23,13 @@ function App() {
 
   return (
     <>
-      <Table records={records} />
+      <Table
+        records={records}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+      />
       <Pagination
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
