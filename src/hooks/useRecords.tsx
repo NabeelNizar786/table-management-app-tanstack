@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Record } from "../types/record";
 import axios from "axios";
+import { useDebounce } from "./useDebounce";
 
 export const useRecords = () => {
   const [records, setRecords] = useState<Record[]>([]);
@@ -11,6 +12,9 @@ export const useRecords = () => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [search, setSearch] = useState<string>("");
+
+  const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -24,6 +28,10 @@ export const useRecords = () => {
           url += `&_sort=${sortBy}&_order=${sortOrder}`;
         }
 
+        if (debouncedSearch) {
+          url += `&q=${debouncedSearch}`;
+        }
+
         const response = await axios.get(url);
 
         setRecords(response?.data);
@@ -35,7 +43,7 @@ export const useRecords = () => {
       }
     };
     fetchRecords();
-  }, [currentPage, limit, sortBy, sortOrder]);
+  }, [currentPage, limit, sortBy, sortOrder, debouncedSearch]);
 
   return {
     records,
@@ -50,5 +58,7 @@ export const useRecords = () => {
     setSortBy,
     sortOrder,
     setSortOrder,
+    search,
+    setSearch,
   };
 };

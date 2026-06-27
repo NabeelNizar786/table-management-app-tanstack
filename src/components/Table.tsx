@@ -5,6 +5,7 @@ import {
   createColumnHelper,
 } from "@tanstack/react-table";
 import type { Record } from "../types/record";
+import { useMemo } from "react";
 
 const columnHelper = createColumnHelper<Record>();
 

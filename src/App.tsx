@@ -16,13 +16,26 @@ function App() {
     setSortBy,
     sortOrder,
     setSortOrder,
+    search,
+    setSearch,
   } = useRecords();
 
-  if (loading) return <div>loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) <p>loading...</p>;
+  if (error)  <p>{error}</p>;
 
   return (
     <>
+      <input
+        type="text"
+        placeholder="Search Tracks..."
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
+      />
+      {search && <button onClick={() => setSearch("")}>Clear</button>}
+      {search && <p>Searching for: {search}</p>}
       <Table
         records={records}
         sortBy={sortBy}
