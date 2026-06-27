@@ -1,20 +1,34 @@
-import { useEffect } from "react";
-import axios from "axios";
+import Pagination from "./components/Pagination";
+import { Table } from "./components/table";
+import { useRecords } from "./hooks/useRecords";
 
 function App() {
-  useEffect(() => {
-    const fetchData = async () => {
-      console.log(import.meta.env.VITE_API_BASE_URL);
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/records?_page=1&_limit=5`,
-      );
-      console.log(response.data);
-    };
+  const {
+    records,
+    loading,
+    error,
+    currentPage,
+    setCurrentPage,
+    limit,
+    setLimit,
+    totalCount,
+  } = useRecords();
 
-    fetchData();
-  }, []);
+  if (loading) return <div>loading...</div>;
+  if (error) return <div>{error}</div>;
 
-  return <div>App</div>;
+  return (
+    <>
+      <Table records={records} />
+      <Pagination
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        limit={limit}
+        setLimit={setLimit}
+        totalCount={totalCount}
+      />
+    </>
+  );
 }
 
 export default App;
