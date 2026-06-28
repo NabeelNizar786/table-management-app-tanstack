@@ -5,7 +5,7 @@ import {
   createColumnHelper,
 } from "@tanstack/react-table";
 import type { Record } from "../types/record";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FixedSizeList as List } from "react-window";
 
 const columnHelper = createColumnHelper<Record>();
@@ -17,6 +17,26 @@ type TableProps = {
   sortOrder: "asc" | "desc";
   setSortOrder: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
   patchRecord: (id: number, updatedData: Partial<Record>) => Promise<void>;
+};
+
+type ColumnVisibility = {
+  [key: string]: boolean;
+};
+
+const columnWidths: { [key: string]: string } = {
+  select: "60px",
+  track_name: "240px",
+  track_artist: "180px",
+  track_album_name: "220px",
+  track_album_release_date: "180px",
+  playlist_genre: "150px",
+  playlist_subgenre: "180px",
+  track_popularity: "140px",
+  danceability: "140px",
+  energy: "120px",
+  tempo: "120px",
+  duration_ms: "140px",
+  actions: "120px",
 };
 
 export function Table({
@@ -32,6 +52,17 @@ export function Table({
   const [editedValues, setEditedValues] = useState<Partial<Record>>({});
 
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
+
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(
+    () => {
+      const saved = localStorage.getItem("columnVisibility");
+      return saved ? JSON.parse(saved) : {};
+    },
+  );
+
+  useEffect(() => {
+    localStorage.setItem("columnVisibility", JSON.stringify(columnVisibility));
+  }, [columnVisibility]);
 
   const columns = useMemo(
     () => [
@@ -245,6 +276,10 @@ export function Table({
   const table = useReactTable({
     data: records,
     columns,
+    state: {
+      columnVisibility,
+    },
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -313,62 +348,119 @@ export function Table({
     link.click();
   };
 
+  const exportAllFiltered = () => {
+    const filteredData = table.getRowModel().rows.map((row) => row.original);
+
+    if (!filteredData.length) {
+      alert("No records to export");
+      return;
+    }
+
+    const headers = Object.keys(filteredData[0]).join(",");
+
+    const rows = filteredData.map((record) =>
+      Object.values(record)
+        .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+        .join(","),
+    );
+
+    const csvContent = [headers, ...rows].join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "filtered-records.csv";
+    link.click();
+  };
+
   return (
     <>
-      <button onClick={exportSelected}>
-        Export Selected ({selectedRows.length})
-      </button>
+      <div className="toolbar">
+        <button onClick={exportSelected}>
+          Export Selected ({selectedRows.length})
+        </button>
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id}>
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
-                </th>
-              ))}
-            </tr>
+        <button onClick={exportAllFiltered}>Export All Filtered</button>
+
+        <div className="column-toggle-container">
+          {table.getAllLeafColumns().map((column) => (
+            <label key={column.id} style={{ marginRight: "10px" }}>
+              <input
+                type="checkbox"
+                checked={column.getIsVisible()}
+                onChange={column.getToggleVisibilityHandler()}
+              />
+              {column.id}
+            </label>
           ))}
-        </thead>
-      </table>
+        </div>
+      </div>
 
-      <List
-        height={500}
-        itemCount={table.getRowModel().rows.length}
-        itemSize={50}
-        width="100%"
-      >
-        {({ index, style }) => {
-          const row = table.getRowModel().rows[index];
+      <div className="table-wrapper">
+        <table style={{ width: "max-content", borderCollapse: "collapse" }}>
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    style={{
+                      width: columnWidths[header.column.id] || "150px",
+                      minWidth: columnWidths[header.column.id] || "150px",
+                    }}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+        </table>
+        <List
+          height={500}
+          itemCount={table.getRowModel().rows.length}
+          itemSize={60}
+          width={table.getVisibleLeafColumns().length * 180} // important
+        >
+          {({ index, style }) => {
+            const row = table.getRowModel().rows[index];
 
-          return (
-            <div
-              style={{
-                ...style,
-                display: "flex",
-                borderBottom: "1px solid #ddd",
-                alignItems: "center",
-              }}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <div
-                  key={cell.id}
-                  style={{
-                    flex: 1,
-                    padding: "8px",
-                  }}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </div>
-              ))}
-            </div>
-          );
-        }}
-      </List>
+            return (
+              <div
+                className={`table-row ${
+                  selectedRows.includes(row.original.id) ? "selected" : ""
+                }`}
+                style={{
+                  ...style,
+                  display: "flex",
+                }}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <div
+                    key={cell.id}
+                    className="table-cell"
+                    style={{
+                      width: columnWidths[cell.column.id] || "150px",
+                      minWidth: columnWidths[cell.column.id] || "150px",
+                      padding: "12px",
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </div>
+                ))}
+              </div>
+            );
+          }}
+        </List>
+      </div>
     </>
   );
 }

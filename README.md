@@ -1,75 +1,118 @@
-# React + TypeScript + Vite
+# Track Management Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A high-performance React + TypeScript table management application for handling large datasets with advanced data operations.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Core Features
 
-## React Compiler
+* Server-side pagination
+* Server-side sorting
+* Search with debouncing
+* Filtering (artist, genre, popularity range)
+* Inline row editing (PATCH updates)
+* Bulk row selection
+* Bulk CSV export (selected rows)
+* Export current filtered dataset
+* Column visibility toggle
+* Persistent column preferences using localStorage
+* Loading, error, and empty states
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Performance Optimizations
 
-## Expanding the ESLint configuration
+* Virtualized row rendering using `react-window`
+* Debounced search input
+* Memoized column definitions using `useMemo`
+* Server-side pagination to avoid loading full dataset
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* React 19
+* TypeScript
+* TanStack Table
+* Axios
+* react-window
+* JSON Server
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Setup Instructions
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Clone the repository
 
+```bash
+git clone <your-repo-url>
+cd table-management-app
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
 ```
+
+### 3. Start frontend
+
+```bash
+npm run dev
+```
+
+### 4. Start JSON Server
+
+```bash
+npx json-server db.json --port 3000
+```
+
+## Environment Variables
+
+Create `.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+## Project Structure
+
+```text
+src/
+├── components/
+│   ├── Table.tsx
+│   └── Pagination.tsx
+├── hooks/
+│   ├── useRecords.ts
+│   └── useDebounce.ts
+├── types/
+│   └── record.ts
+├── App.tsx
+└── App.css
+```
+
+## Architecture Decisions
+
+### Why server-side pagination?
+
+To avoid loading all records into the browser and improve scalability.
+
+### Why virtualization?
+
+Even paginated datasets can become heavy. Virtualization renders only visible rows for better performance.
+
+### Why inline editing?
+
+Provides quick data updates without navigating away.
+
+### Why localStorage for column visibility?
+
+Improves user experience by persisting preferences.
+
+## Tradeoffs
+
+* Virtualized rows use flex layout instead of semantic table rows for performance.
+* Column width management is manual for alignment consistency.
+
+## Future Improvements
+
+* Dark mode
+* Advanced multi-column sorting
+* Better form validation
+* Drag-and-drop column reordering
+* Row grouping
+* Better accessibility support

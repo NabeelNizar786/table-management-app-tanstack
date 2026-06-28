@@ -26,85 +26,97 @@ function App() {
     setMinPopularity,
     maxPopularity,
     setMaxPopularity,
-    patchRecord
+    patchRecord,
   } = useRecords();
 
   if (loading) <p>loading...</p>;
   if (error) <p>{error}</p>;
+  // if (!records.length) {
+  //   return <p>No records found</p>;
+  // }
 
   return (
     <>
-      <input
-        type="text"
-        placeholder="Search Tracks..."
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setCurrentPage(1);
-        }}
-      />
-      {search && <button onClick={() => setSearch("")}>Clear</button>}
-      {search && <p>Searching for: {search}</p>}
-      <input
-        type="text"
-        placeholder="Filter by artist"
-        value={artistFilter}
-        onChange={(e) => {
-          setArtistFilter(e.target.value);
-          setCurrentPage(1);
-        }}
-      />
+      <div className="app-container">
+              <h1>Track Management Dashboard</h1>
+        <div className="toolbar">
+          <input
+            type="text"
+            placeholder="Search Tracks..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          {search && <button onClick={() => setSearch("")}>Clear</button>}
+          {search && <p>Searching for: {search}</p>}
+          <input
+            type="text"
+            placeholder="Filter by artist"
+            value={artistFilter}
+            onChange={(e) => {
+              setArtistFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
 
-      <select
-        value={genreFilter}
-        onChange={(e) => {
-          setGenreFilter(e.target.value);
-          setCurrentPage(1);
-        }}
-      >
-        <option value="">All Genres</option>
-        <option value="pop">Pop</option>
-        <option value="rap">Rap</option>
-        <option value="rock">Rock</option>
-        <option value="latin">Latin</option>
-        <option value="edm">EDM</option>
-      </select>
+          <select
+            value={genreFilter}
+            onChange={(e) => {
+              setGenreFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Genres</option>
+            <option value="pop">Pop</option>
+            <option value="rap">Rap</option>
+            <option value="rock">Rock</option>
+            <option value="latin">Latin</option>
+            <option value="edm">EDM</option>
+          </select>
 
-      <input
-        type="number"
-        placeholder="Min popularity"
-        value={minPopularity}
-        onChange={(e) => {
-          setMinPopularity(e.target.value);
-          setCurrentPage(1);
-        }}
-      />
+          <input
+            type="number"
+            placeholder="Min popularity"
+            value={minPopularity}
+            onChange={(e) => {
+              setMinPopularity(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
 
-      <input
-        type="number"
-        placeholder="Max popularity"
-        value={maxPopularity}
-        onChange={(e) => {
-          setMaxPopularity(e.target.value);
-          setCurrentPage(1);
-        }}
-      />
+          <input
+            type="number"
+            placeholder="Max popularity"
+            value={maxPopularity}
+            onChange={(e) => {
+              setMaxPopularity(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
 
-      <Table
-        records={records}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        sortOrder={sortOrder}
-        setSortOrder={setSortOrder}
-        patchRecord={patchRecord}
-      />
-      <Pagination
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        limit={limit}
-        setLimit={setLimit}
-        totalCount={totalCount}
-      />
+        <div className="table-container">
+          <Table
+            records={records}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+            patchRecord={patchRecord}
+          />
+        </div>
+        <div className="pagination">
+          <Pagination
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            limit={limit}
+            setLimit={setLimit}
+            totalCount={totalCount}
+          />
+        </div>
+      </div>
     </>
   );
 }
