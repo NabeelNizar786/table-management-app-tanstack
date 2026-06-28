@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-table";
 import type { Record } from "../types/record";
 import { useMemo, useState } from "react";
+import { FixedSizeList as List } from "react-window";
 
 const columnHelper = createColumnHelper<Record>();
 
@@ -317,7 +318,8 @@ export function Table({
       <button onClick={exportSelected}>
         Export Selected ({selectedRows.length})
       </button>
-      <table>
+
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -332,18 +334,41 @@ export function Table({
             </tr>
           ))}
         </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
       </table>
+
+      <List
+        height={500}
+        itemCount={table.getRowModel().rows.length}
+        itemSize={50}
+        width="100%"
+      >
+        {({ index, style }) => {
+          const row = table.getRowModel().rows[index];
+
+          return (
+            <div
+              style={{
+                ...style,
+                display: "flex",
+                borderBottom: "1px solid #ddd",
+                alignItems: "center",
+              }}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <div
+                  key={cell.id}
+                  style={{
+                    flex: 1,
+                    padding: "8px",
+                  }}
+                >
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </div>
+              ))}
+            </div>
+          );
+        }}
+      </List>
     </>
   );
 }
