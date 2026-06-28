@@ -1,7 +1,7 @@
 # Track Management Dashboard
 
-Live Demo: https://your-vercel-url.vercel.app
-API: https://your-render-url.onrender.com
+Live Demo: https://table-management-app-tanstack.vercel.app/
+API: https://table-management-app-tanstack.onrender.com
 
 A high-performance React + TypeScript table management application for handling large datasets with advanced data operations.
 
