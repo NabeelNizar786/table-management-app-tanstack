@@ -26,6 +26,7 @@ function App() {
     setMinPopularity,
     maxPopularity,
     setMaxPopularity,
+    patchRecord
   } = useRecords();
 
   if (loading) <p>loading...</p>;
@@ -95,6 +96,7 @@ function App() {
         setSortBy={setSortBy}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
+        patchRecord={patchRecord}
       />
       <Pagination
         currentPage={currentPage}

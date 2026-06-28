@@ -75,6 +75,26 @@ export const useRecords = () => {
     maxPopularity,
   ]);
 
+  const patchRecord = async (id: number, updatedData: Partial<Record>) => {
+    const previousRecords = [...records];
+
+    setRecords((prev) =>
+      prev.map((record) =>
+        record.id === id ? { ...record, ...updatedData } : record,
+      ),
+    );
+
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/records/${id}`,
+        updatedData,
+      );
+    } catch (error) {
+      setRecords(previousRecords);
+      throw error;
+    }
+  };
+
   return {
     records,
     loading,
@@ -98,5 +118,6 @@ export const useRecords = () => {
     setMinPopularity,
     maxPopularity,
     setMaxPopularity,
+    patchRecord,
   };
 };

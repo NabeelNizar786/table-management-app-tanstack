@@ -5,7 +5,7 @@ import {
   createColumnHelper,
 } from "@tanstack/react-table";
 import type { Record } from "../types/record";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const columnHelper = createColumnHelper<Record>();
 
@@ -15,6 +15,7 @@ type TableProps = {
   setSortBy: React.Dispatch<React.SetStateAction<string>>;
   sortOrder: "asc" | "desc";
   setSortOrder: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
+  patchRecord: (id: number, updatedData: Partial<Record>) => Promise<void>;
 };
 
 export function Table({
@@ -23,122 +24,186 @@ export function Table({
   setSortBy,
   sortOrder,
   setSortOrder,
+  patchRecord,
 }: TableProps) {
-  const columns = [
-    columnHelper.accessor("track_name", {
-      header: () => {
-        return (
+  const [editingRowId, setEditingRowId] = useState<number | null>(null);
+
+  const [editedValues, setEditedValues] = useState<Partial<Record>>({});
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("track_name", {
+        header: () => (
           <button onClick={() => handleSort("track_name")}>
             Track Name
             {sortBy === "track_name" && (sortOrder === "asc" ? " ↑" : " ↓")}
           </button>
-        );
-      },
-    }),
-    columnHelper.accessor("track_artist", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("track_artist")}>
-            Track Artist
-            {sortBy === "track_artist" && (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-    columnHelper.accessor("track_album_name", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("track_album_name")}>
-            Track Album Name
-            {sortBy === "track_album_name" &&
-              (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-    columnHelper.accessor("track_album_release_date", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("track_album_release_date")}>
-            Track Album Release Date
-            {sortBy === "track_album_release_date" &&
-              (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-    columnHelper.accessor("playlist_genre", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("playlist_genre")}>
-            Playlist Genre
-            {sortBy === "playlist_genre" && (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-    columnHelper.accessor("playlist_subgenre", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("playlist_subgenre")}>
-            Playlist Subgenre
-            {sortBy === "playlist_subgenre" &&
-              (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-    columnHelper.accessor("track_popularity", {
-      header: () => {
-        return (
+        ),
+        cell: ({ row }) =>
+          editingRowId === row.original.id ? (
+            <input
+              value={editedValues.track_name ?? ""}
+              onChange={(e) =>
+                setEditedValues((prev) => ({
+                  ...prev,
+                  track_name: e.target.value,
+                }))
+              }
+            />
+          ) : (
+            row.original.track_name
+          ),
+      }),
+      columnHelper.accessor("track_artist", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("track_artist")}>
+              Track Artist
+              {sortBy === "track_artist" && (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("track_album_name", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("track_album_name")}>
+              Track Album Name
+              {sortBy === "track_album_name" &&
+                (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("track_album_release_date", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("track_album_release_date")}>
+              Track Album Release Date
+              {sortBy === "track_album_release_date" &&
+                (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("playlist_genre", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("playlist_genre")}>
+              Playlist Genre
+              {sortBy === "playlist_genre" &&
+                (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("playlist_subgenre", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("playlist_subgenre")}>
+              Playlist Subgenre
+              {sortBy === "playlist_subgenre" &&
+                (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("track_popularity", {
+        header: () => (
           <button onClick={() => handleSort("track_popularity")}>
             Track Popularity
             {sortBy === "track_popularity" &&
               (sortOrder === "asc" ? " ↑" : " ↓")}
           </button>
-        );
-      },
-    }),
-    columnHelper.accessor("danceability", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("danceability")}>
-            Danceability
-            {sortBy === "danceability" && (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-    columnHelper.accessor("energy", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("energy")}>
-            Energy
-            {sortBy === "energy" && (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-    columnHelper.accessor("tempo", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("tempo")}>
-            Tempo{sortBy === "tempo" && (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-    columnHelper.accessor("duration_ms", {
-      header: () => {
-        return (
-          <button onClick={() => handleSort("duration_ms")}>
-            Duration Ms
-            {sortBy === "duration_ms" && (sortOrder === "asc" ? " ↑" : " ↓")}
-          </button>
-        );
-      },
-    }),
-  ];
+        ),
+        cell: ({ row }) =>
+          editingRowId === row.original.id ? (
+            <input
+              type="number"
+              value={editedValues.track_popularity ?? ""}
+              onChange={(e) =>
+                setEditedValues((prev) => ({
+                  ...prev,
+                  track_popularity: Number(e.target.value),
+                }))
+              }
+            />
+          ) : (
+            row.original.track_popularity
+          ),
+      }),
+      columnHelper.accessor("danceability", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("danceability")}>
+              Danceability
+              {sortBy === "danceability" && (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("energy", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("energy")}>
+              Energy
+              {sortBy === "energy" && (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("tempo", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("tempo")}>
+              Tempo{sortBy === "tempo" && (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("duration_ms", {
+        header: () => {
+          return (
+            <button onClick={() => handleSort("duration_ms")}>
+              Duration Ms
+              {sortBy === "duration_ms" && (sortOrder === "asc" ? " ↑" : " ↓")}
+            </button>
+          );
+        },
+      }),
+      columnHelper.display({
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) =>
+          editingRowId === row.original.id ? (
+            <>
+              <button onClick={() => handleSave(row.original.id)}>Save</button>
+              <button
+                onClick={() => {
+                  setEditingRowId(null);
+                  setEditedValues({});
+                }}
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => {
+                setEditingRowId(row.original.id);
+                setEditedValues({
+                  track_name: row.original.track_name,
+                  track_popularity: row.original.track_popularity,
+                });
+              }}
+            >
+              Edit
+            </button>
+          ),
+      }),
+    ],
+    [sortBy, sortOrder, editingRowId, editedValues],
+  );
 
   const table = useReactTable({
     data: records,
@@ -152,6 +217,30 @@ export function Table({
     } else {
       setSortBy(column);
       setSortOrder("asc");
+    }
+  };
+
+  const handleSave = async (id: number) => {
+    if (!editedValues.track_name?.trim()) {
+      alert("Track name cannot be empty");
+      return;
+    }
+
+    if (
+      editedValues.track_popularity !== undefined &&
+      (editedValues.track_popularity < 0 || editedValues.track_popularity > 100)
+    ) {
+      alert("Popularity must be between 0 and 100");
+      return;
+    }
+
+    try {
+      await patchRecord(id, editedValues);
+
+      setEditingRowId(null);
+      setEditedValues({});
+    } catch {
+      alert("Failed to save changes");
     }
   };
 
