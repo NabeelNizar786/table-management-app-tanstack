@@ -18,10 +18,18 @@ function App() {
     setSortOrder,
     search,
     setSearch,
+    artistFilter,
+    setArtistFilter,
+    genreFilter,
+    setGenreFilter,
+    minPopularity,
+    setMinPopularity,
+    maxPopularity,
+    setMaxPopularity,
   } = useRecords();
 
   if (loading) <p>loading...</p>;
-  if (error)  <p>{error}</p>;
+  if (error) <p>{error}</p>;
 
   return (
     <>
@@ -36,6 +44,51 @@ function App() {
       />
       {search && <button onClick={() => setSearch("")}>Clear</button>}
       {search && <p>Searching for: {search}</p>}
+      <input
+        type="text"
+        placeholder="Filter by artist"
+        value={artistFilter}
+        onChange={(e) => {
+          setArtistFilter(e.target.value);
+          setCurrentPage(1);
+        }}
+      />
+
+      <select
+        value={genreFilter}
+        onChange={(e) => {
+          setGenreFilter(e.target.value);
+          setCurrentPage(1);
+        }}
+      >
+        <option value="">All Genres</option>
+        <option value="pop">Pop</option>
+        <option value="rap">Rap</option>
+        <option value="rock">Rock</option>
+        <option value="latin">Latin</option>
+        <option value="edm">EDM</option>
+      </select>
+
+      <input
+        type="number"
+        placeholder="Min popularity"
+        value={minPopularity}
+        onChange={(e) => {
+          setMinPopularity(e.target.value);
+          setCurrentPage(1);
+        }}
+      />
+
+      <input
+        type="number"
+        placeholder="Max popularity"
+        value={maxPopularity}
+        onChange={(e) => {
+          setMaxPopularity(e.target.value);
+          setCurrentPage(1);
+        }}
+      />
+
       <Table
         records={records}
         sortBy={sortBy}

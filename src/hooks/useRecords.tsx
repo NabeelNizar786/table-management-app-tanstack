@@ -13,6 +13,10 @@ export const useRecords = () => {
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [search, setSearch] = useState<string>("");
+  const [artistFilter, setArtistFilter] = useState("");
+  const [genreFilter, setGenreFilter] = useState("");
+  const [minPopularity, setMinPopularity] = useState("");
+  const [maxPopularity, setMaxPopularity] = useState("");
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -32,6 +36,22 @@ export const useRecords = () => {
           url += `&q=${debouncedSearch}`;
         }
 
+        if (artistFilter) {
+          url += `&track_artist_like=${artistFilter}`;
+        }
+
+        if (genreFilter) {
+          url += `&playlist_genre=${genreFilter}`;
+        }
+
+        if (minPopularity) {
+          url += `&track_popularity_gte=${minPopularity}`;
+        }
+
+        if (maxPopularity) {
+          url += `&track_popularity_lte=${maxPopularity}`;
+        }
+
         const response = await axios.get(url);
 
         setRecords(response?.data);
@@ -43,7 +63,17 @@ export const useRecords = () => {
       }
     };
     fetchRecords();
-  }, [currentPage, limit, sortBy, sortOrder, debouncedSearch]);
+  }, [
+    currentPage,
+    limit,
+    sortBy,
+    sortOrder,
+    debouncedSearch,
+    artistFilter,
+    genreFilter,
+    minPopularity,
+    maxPopularity,
+  ]);
 
   return {
     records,
@@ -60,5 +90,13 @@ export const useRecords = () => {
     setSortOrder,
     search,
     setSearch,
+    artistFilter,
+    setArtistFilter,
+    genreFilter,
+    setGenreFilter,
+    minPopularity,
+    setMinPopularity,
+    maxPopularity,
+    setMaxPopularity,
   };
 };
