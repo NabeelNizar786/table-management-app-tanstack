@@ -30,8 +30,44 @@ export function Table({
 
   const [editedValues, setEditedValues] = useState<Partial<Record>>({});
 
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+
   const columns = useMemo(
     () => [
+      columnHelper.display({
+        id: "select",
+        header: () => (
+          <input
+            type="checkbox"
+            checked={
+              records.length > 0 &&
+              records.every((record) => selectedRows.includes(record.id))
+            }
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedRows(records.map((record) => record.id));
+              } else {
+                setSelectedRows([]);
+              }
+            }}
+          />
+        ),
+        cell: ({ row }) => (
+          <input
+            type="checkbox"
+            checked={selectedRows.includes(row.original.id)}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedRows((prev) => [...prev, row.original.id]);
+              } else {
+                setSelectedRows((prev) =>
+                  prev.filter((id) => id !== row.original.id),
+                );
+              }
+            }}
+          />
+        ),
+      }),
       columnHelper.accessor("track_name", {
         header: () => (
           <button onClick={() => handleSort("track_name")}>
@@ -202,7 +238,7 @@ export function Table({
           ),
       }),
     ],
-    [sortBy, sortOrder, editingRowId, editedValues],
+    [sortBy, sortOrder, editingRowId, editedValues, selectedRows, records],
   );
 
   const table = useReactTable({
@@ -244,33 +280,70 @@ export function Table({
     }
   };
 
+  const exportSelected = () => {
+    const selectedData = records.filter((record) =>
+      selectedRows.includes(record.id),
+    );
+
+    if (!selectedData.length) {
+      alert("No rows selected");
+      return;
+    }
+
+    const headers = Object.keys(selectedData[0]).join(",");
+
+    const rows = selectedData.map((record) =>
+      Object.values(record)
+        .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+        .join(","),
+    );
+
+    const csvContent = [headers, ...rows].join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "selected-records.csv";
+    link.click();
+  };
+
   return (
-    <table>
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <th key={header.id}>
-                {flexRender(
-                  header.column.columnDef.header,
-                  header.getContext(),
-                )}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <>
+      <button onClick={exportSelected}>
+        Export Selected ({selectedRows.length})
+      </button>
+      <table>
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th key={header.id}>
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
