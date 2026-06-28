@@ -1,5 +1,5 @@
 import Pagination from "./components/Pagination";
-import { Table } from "./components/table";
+import { Table } from "./components/Table";
 import { useRecords } from "./hooks/useRecords";
 
 function App() {
@@ -38,7 +38,7 @@ function App() {
   return (
     <>
       <div className="app-container">
-              <h1>Track Management Dashboard</h1>
+        <h1>Track Management Dashboard</h1>
         <div className="toolbar">
           <input
             type="text"
